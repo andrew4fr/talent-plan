@@ -1,4 +1,7 @@
 use structopt::StructOpt;
+use kvs::{KvStore, KvsError, Result};
+use std::process::exit;
+use std::env::current_dir;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -22,20 +25,33 @@ enum Command {
     Rm { key: String },
 }
 
-fn main() {
-    /*
-    if let Some(m) = matches.subcommand_matches("get") {
-        if m.is_present("key") {}
-    }
-    */
-
+fn main() -> Result<()> {
     let opt = Opt::from_args();
-    println!("{:#?}", opt);
+
+    let store = KvStore::open(current_dir()?)?;
 
     match opt.cmd {
-        Command::Set { key, value } => unimplemented!(),
-        Command::Get { key } => unimplemented!(),
-        Command::Rm { key } => unimplemented!(),
-        _ => unreachable!(),
+        Command::Set { key, value } => {
+            store.set(key, value)?;
+        },
+        Command::Get { key } => {
+            if let Some(val) = store.get(key)? {
+                println!("{}", val);
+            } else {
+                println!("Key not found");
+            }
+        },
+        Command::Rm { key } => {
+            match store.remove(key) {
+                Ok(()) => {},
+                Err(KvsError::KeyNotFound) => {
+                    println!("Key not found");
+                    exit(1);
+                },
+                Err(e) => return Err(e),
+            }
+        }
     }
+
+    Ok(())
 }

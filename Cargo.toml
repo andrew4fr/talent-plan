@@ -9,10 +9,13 @@ edition = "2018"
 
 [dependencies]
 structopt = "0.3"
+failure = "0.1.6"
 
 [dev-dependencies]
 assert_cmd = "0.12.0"
 predicates = "1.0.2"
+tempfile = "3.1.0"
+walkdir = "2.3.1"
 
 [lib]
 test = false
