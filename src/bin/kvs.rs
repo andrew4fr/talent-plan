@@ -1,7 +1,7 @@
-use structopt::StructOpt;
 use kvs::{KvStore, KvsError, Result};
-use std::process::exit;
 use std::env::current_dir;
+use std::process::exit;
+use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
 #[structopt(
@@ -33,24 +33,22 @@ fn main() -> Result<()> {
     match opt.cmd {
         Command::Set { key, value } => {
             store.set(key, value)?;
-        },
+        }
         Command::Get { key } => {
             if let Some(val) = store.get(key)? {
                 println!("{}", val);
             } else {
                 println!("Key not found");
             }
-        },
-        Command::Rm { key } => {
-            match store.remove(key) {
-                Ok(()) => {},
-                Err(KvsError::KeyNotFound) => {
-                    println!("Key not found");
-                    exit(1);
-                },
-                Err(e) => return Err(e),
-            }
         }
+        Command::Rm { key } => match store.remove(key) {
+            Ok(()) => {}
+            Err(KvsError::KeyNotFound) => {
+                println!("Key not found");
+                exit(1);
+            }
+            Err(e) => return Err(e),
+        },
     }
 
     Ok(())
